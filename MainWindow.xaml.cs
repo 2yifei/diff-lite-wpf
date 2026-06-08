@@ -503,7 +503,7 @@ public partial class MainWindow : Window
     private void About_Click(object? sender, RoutedEventArgs? e)
     {
         MessageBox.Show(
-            "Diff-Lite v1.0.0\n\n轻量级代码比对工具\n适用于 Windows 系统\n\n纯中文界面 · 深色模式 · 高速比对引擎",
+            "Diff-Lite v2.0.0\n\n轻量级代码比对工具\n适用于 Windows 系统\n\n纯中文界面 · 深色模式 · WPF 原生引擎",
             "关于 Diff-Lite",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
