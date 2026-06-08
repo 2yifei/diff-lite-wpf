@@ -33,9 +33,13 @@ jobs:
       - name: 构建
         run: dotnet build -c Release --no-restore
 
-      - name: 发布单文件
+      - name: 发布（框架依赖，不含运行时）
         run: |
-          dotnet publish -c Release -o publish -p:PublishSingleFile=true
+          dotnet publish -c Release -o publish
+
+      - name: 打包为 ZIP
+        run: |
+          Compress-Archive -Path publish\* -DestinationPath DiffLite-WPF-v2.0.${{ github.run_number }}.zip
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
@@ -48,12 +52,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: always()
         with:
-          tag_name: v${{ github.run_number }}
-          name: "Diff-Lite WPF v${{ github.run_number }}"
+          tag_name: v2.0.${{ github.run_number }}
+          name: "Diff-Lite WPF v2.0.${{ github.run_number }}"
           body: |
-            ## Diff-Lite WPF v${{ github.run_number }}
-            ### 下载
-            - 下载 `DiffLite.exe` 双击运行
-          files: publish/DiffLite.exe
+            ## Diff-Lite WPF v2.0.${{ github.run_number }}
+
+            ### 📦 使用说明
+            1. 下载 `DiffLite-WPF-v2.0.X.zip`
+            2. 解压到任意文件夹
+            3. 双击 `DiffLite.exe` 即可运行
+            > 需要 [.NET 8.0 桌面运行时](https://dotnet.microsoft.com/download/dotnet/8.0)（Win10/11 通常已自带）
+
+            ### 📏 体积
+            解压后约 1MB，exe 仅 150KB
+          files: |
+            DiffLite-WPF-v2.0.${{ github.run_number }}.zip
           draft: false
           prerelease: false
