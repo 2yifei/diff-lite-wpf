@@ -2,7 +2,7 @@
 
 **轻量级代码比对工具** — 原生 Windows 应用，基于 C# WPF + AvalonEdit。
 
-![version](https://img.shields.io/badge/version-2.0.0-blue)
+![version](https://img.shields.io/badge/version-2.1.0-blue)
 ![platform](https://img.shields.io/badge/platform-Windows-purple)
 ![dotnet](https://img.shields.io/badge/.NET-8.0-512BD4)
 
