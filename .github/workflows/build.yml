@@ -35,7 +35,7 @@ jobs:
 
       - name: 发布单文件
         run: |
-          dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+          dotnet publish -c Release -o publish -p:PublishSingleFile=true
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
