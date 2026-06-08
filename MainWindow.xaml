@@ -1,0 +1,174 @@
+<Window x:Class="DiffLite.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        Title="Diff-Lite — 轻量级代码比对工具"
+        Width="1400" Height="900"
+        MinWidth="900" MinHeight="600"
+        Icon="/DiffLite;component/icon.ico"
+        WindowStartupLocation="CenterScreen">
+
+    <DockPanel LastChildFill="True">
+        <!-- ========== 菜单栏 ========== -->
+        <Menu DockPanel.Dock="Top" Height="24" FontSize="12">
+            <MenuItem Header="文件">
+                <MenuItem x:Name="mnuOpenLeft" Header="打开左侧文件" InputGestureText="Ctrl+O" Click="OpenLeft_Click" />
+                <MenuItem x:Name="mnuOpenRight" Header="打开右侧文件" InputGestureText="Ctrl+Shift+O" Click="OpenRight_Click" />
+                <Separator />
+                <MenuItem Header="退出" InputGestureText="Alt+F4" Click="Exit_Click" />
+            </MenuItem>
+            <MenuItem Header="比对">
+                <MenuItem x:Name="mnuCompare" Header="开始比对" InputGestureText="Ctrl+R" Click="Compare_Click" />
+                <MenuItem x:Name="mnuClear" Header="清空内容" InputGestureText="Ctrl+Shift+R" Click="Clear_Click" />
+            </MenuItem>
+            <MenuItem Header="视图">
+                <MenuItem x:Name="mnuTheme" Header="切换深色模式" InputGestureText="Ctrl+D" Click="ToggleTheme_Click" />
+            </MenuItem>
+            <MenuItem Header="帮助">
+                <MenuItem Header="关于 Diff-Lite" Click="About_Click" />
+            </MenuItem>
+        </Menu>
+
+        <!-- ========== 工具栏 ========== -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource BgSecondaryBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="btnOpenLeft" Style="{StaticResource ToolbarButton}" Click="OpenLeft_Click" ToolTip="选择一个旧版本的文件进行比对">
+                    📂 打开左侧文件
+                </Button>
+                <Button x:Name="btnOpenRight" Style="{StaticResource ToolbarButton}" Click="OpenRight_Click" Margin="4,0,0,0" ToolTip="选择一个新版本的文件进行比对">
+                    📂 打开右侧文件
+                </Button>
+                <Separator Width="1" Background="{StaticResource BorderBrush}" Margin="6,2" />
+                <Button x:Name="btnCompare" Style="{StaticResource PrimaryButton}" Click="Compare_Click" ToolTip="开始比对左右两侧的文件内容">
+                    🔍 一键比对
+                </Button>
+                <Button x:Name="btnClear" Style="{StaticResource ToolbarButton}" Click="Clear_Click" Margin="4,0,0,0" ToolTip="清空两侧的文本内容">
+                    🗑️ 清空
+                </Button>
+                <Separator Width="1" Background="{StaticResource BorderBrush}" Margin="6,2" />
+                <TextBlock Text="语言:" Foreground="{StaticResource TextMutedBrush}" FontSize="11" VerticalAlignment="Center" />
+                <ComboBox x:Name="cmbLanguage" SelectedIndex="0" Margin="4,0,0,0"
+                          Background="{StaticResource BgTertiaryBrush}"
+                          Foreground="{StaticResource TextPrimaryBrush}"
+                          BorderBrush="{StaticResource BorderBrush}"
+                          FontSize="11" Width="100">
+                    <ComboBoxItem Content="自动检测" IsSelected="True" />
+                    <ComboBoxItem Content="C#" />
+                    <ComboBoxItem Content="C/C++" />
+                    <ComboBoxItem Content="CSS" />
+                    <ComboBoxItem Content="Go" />
+                    <ComboBoxItem Content="HTML" />
+                    <ComboBoxItem Content="Java" />
+                    <ComboBoxItem Content="JavaScript" />
+                    <ComboBoxItem Content="JSON" />
+                    <ComboBoxItem Content="Markdown" />
+                    <ComboBoxItem Content="PHP" />
+                    <ComboBoxItem Content="PowerShell" />
+                    <ComboBoxItem Content="Python" />
+                    <ComboBoxItem Content="Rust" />
+                    <ComboBoxItem Content="SQL" />
+                    <ComboBoxItem Content="TypeScript" />
+                    <ComboBoxItem Content="XML" />
+                    <ComboBoxItem Content="YAML" />
+                </ComboBox>
+
+                <Button x:Name="btnTheme" Style="{StaticResource ToolbarButton}" Click="ToggleTheme_Click" Margin="6,0,0,0" ToolTip="切换深色/浅色模式" Content="🌙" />
+            </StackPanel>
+        </Border>
+
+        <!-- ========== 主内容区域（左右分屏） ========== -->
+        <Grid DockPanel.Dock="Top" Background="{StaticResource BgPrimaryBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="leftCol" Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition x:Name="rightCol" Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧面板 -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="28" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{StaticResource BgTertiaryBrush}"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+                        Padding="10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource PanelHeader}" Text="旧文件" VerticalAlignment="Center" />
+                        <TextBlock x:Name="txtLeftFile" Text="  —  未选择文件"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+                <avalonEdit:TextEditor x:Name="leftEditor" Grid.Row="1"
+                                        FontFamily="Consolas" FontSize="12"
+                                        ShowLineNumbers="True"
+                                        Background="#1E1E1E"
+                                        Foreground="#CCCCCC"
+                                        LineNumbersForeground="#858585"
+                                        SyntaxHighlighting="C#"
+                                        WordWrap="False" />
+            </Grid>
+
+            <!-- 分隔条 -->
+            <GridSplitter Grid.Column="1" Style="{StaticResource GridSplitterStyle}"
+                          ResizeBehavior="PreviousAndNext" />
+
+            <!-- 右侧面板 -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="28" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{StaticResource BgTertiaryBrush}"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+                        Padding="10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource PanelHeader}" Text="新文件" VerticalAlignment="Center" />
+                        <TextBlock x:Name="txtRightFile" Text="  —  未选择文件"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+                <avalonEdit:TextEditor x:Name="rightEditor" Grid.Row="1"
+                                        FontFamily="Consolas" FontSize="12"
+                                        ShowLineNumbers="True"
+                                        Background="#1E1E1E"
+                                        Foreground="#CCCCCC"
+                                        LineNumbersForeground="#858585"
+                                        SyntaxHighlighting="C#"
+                                        WordWrap="False" />
+            </Grid>
+        </Grid>
+
+        <!-- ========== 比对结果区域 ========== -->
+        <Border x:Name="diffResultPanel" DockPanel.Dock="Bottom"
+                Background="{StaticResource BgSecondaryBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                Padding="10,6" Height="0" Visibility="Collapsed">
+            <TextBlock x:Name="txtDiffResult" FontSize="12" VerticalAlignment="Center" />
+        </Border>
+
+        <!-- ========== 状态栏 ========== -->
+        <Border DockPanel.Dock="Bottom" Height="24"
+                Background="{StaticResource StatusBarBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="txtStatus" Grid.Column="0"
+                           Text="就绪 — 点击上方按钮打开文件开始比对"
+                           Foreground="White" FontSize="11"
+                           VerticalAlignment="Center" Margin="10,0" />
+                <TextBlock x:Name="txtThemeMode" Grid.Column="1"
+                           Text="深色模式"
+                           Foreground="White" FontSize="11"
+                           VerticalAlignment="Center" Margin="0,0,10,0" />
+            </Grid>
+        </Border>
+    </DockPanel>
+</Window>

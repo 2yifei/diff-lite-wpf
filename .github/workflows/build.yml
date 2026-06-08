@@ -1,0 +1,59 @@
+# ===================================
+# Diff-Lite WPF — GitHub Actions 自动构建
+# 推送到 main 分支时自动编译并发布 Release
+# ===================================
+
+name: 构建与发布
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: 构建 Windows 单文件程序
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 .NET 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0
+
+      - name: 还原依赖
+        run: dotnet restore
+
+      - name: 构建
+        run: dotnet build -c Release --no-restore
+
+      - name: 发布单文件
+        run: |
+          dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: Diff-Lite-WPF
+          path: publish/
+          retention-days: 30
+
+      - name: 创建 Release
+        uses: softprops/action-gh-release@v2
+        if: always()
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "Diff-Lite WPF v${{ github.run_number }}"
+          body: |
+            ## Diff-Lite WPF v${{ github.run_number }}
+            ### 下载
+            - 下载 `DiffLite.exe` 双击运行
+          files: publish/DiffLite.exe
+          draft: false
+          prerelease: false
